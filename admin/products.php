@@ -168,7 +168,7 @@ $totalStock = array_sum(array_map(static fn ($product) => (int) $product['stock'
                         <tr>
                             <td><div class="admin-product-cell"><img src="<?= h($adminProductImage) ?>" alt="" onerror="this.onerror=null;this.src='../assets/product-placeholder.svg'"><div><strong><?= h($product['name']) ?></strong><small><?= h($product['description'] ?? '') ?></small></div></div></td>
                             <td><span class="product-category-badge"><?= h(product_category($product)) ?></span></td>
-                            <td class="admin-price">PHP <?= number_format((float) $product['price'], 2) ?></td>
+                            <td class="admin-price">&#8369;<?= number_format((float) $product['price'], 2) ?></td>
                             <td><?= (int) $product['stock'] ?></td>
                             <td><span class="stock-badge <?= (int) $product['stock'] > 0 ? 'is-available' : 'is-empty' ?>"><?= (int) $product['stock'] > 0 ? 'In stock' : 'Out of stock' ?></span></td>
                             <td><div class="admin-actions"><a class="btn btn-outline-primary btn-sm" href="?edit=<?= (int) $product['id'] ?>#product-form">Edit</a><form method="post" onsubmit="return confirm('Remove this product from the catalog?')"><input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int) $product['id'] ?>"><button class="btn btn-outline-danger btn-sm" type="submit">Delete</button></form></div></td>
@@ -187,7 +187,7 @@ $totalStock = array_sum(array_map(static fn ($product) => (int) $product['stock'
             <input type="hidden" name="action" value="save">
             <input type="hidden" name="id" value="<?= h($editing['id'] ?? '') ?>">
             <div class="col-md-6"><label class="form-label" for="name">Product name</label><input class="form-control" id="name" name="name" maxlength="180" required value="<?= h($editing['name'] ?? '') ?>"></div>
-            <div class="col-md-3"><label class="form-label" for="price">Price (PHP)</label><input class="form-control" id="price" name="price" type="number" min="0" step="0.01" required value="<?= h($editing['price'] ?? '') ?>"></div>
+            <div class="col-md-3"><label class="form-label" for="price">Price (&#8369;)</label><input class="form-control" id="price" name="price" type="number" min="0" step="0.01" required value="<?= h($editing['price'] ?? '') ?>"></div>
             <div class="col-md-3"><label class="form-label" for="stock">Stock</label><input class="form-control" id="stock" name="stock" type="number" min="0" step="1" required value="<?= h($editing['stock'] ?? '') ?>"></div>
             <div class="col-12"><label class="form-label" for="image">Image URL <span class="text-secondary fw-normal">(optional)</span></label><input class="form-control" id="image" name="image" type="url" maxlength="1000" placeholder="https://example.com/product.jpg" value="<?= h($editing['image'] ?? '') ?>"></div>
             <div class="col-12"><label class="form-label" for="description">Description</label><textarea class="form-control" id="description" name="description" rows="4" maxlength="5000" placeholder="What makes this product special?"><?= h($editing['description'] ?? '') ?></textarea></div>

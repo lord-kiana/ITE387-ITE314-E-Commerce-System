@@ -74,7 +74,7 @@ $orders = $stmt->fetchAll();
                         <li class="order-item-row">
                             <img src="<?= h($orderImage) ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                             <span><?= h($item['product_name']) ?><small>Qty <?= (int) $item['quantity'] ?></small></span>
-                            <strong>₱<?= number_format((float) $item['line_total'], 2) ?></strong>
+                            <strong>&#8369;<?= number_format((float) $item['line_total'], 2) ?></strong>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -83,19 +83,19 @@ $orders = $stmt->fetchAll();
 
                 <div class="text-end">
                     <p>
-                        Subtotal: ₱<?= number_format(
+                        Subtotal: &#8369;<?= number_format(
                             (float) $order['subtotal'],
                             2
                         ) ?>
                     </p>
                     <p>
-                        Discount: −₱<?= number_format(
+                        Discount: -&#8369;<?= number_format(
                             (float) $order['discount_amount'],
                             2
                         ) ?>
                     </p>
                     <h3 class="h5">
-                        Total: ₱<?= number_format(
+                        Total: &#8369;<?= number_format(
                             (float) $order['total'],
                             2
                         ) ?>

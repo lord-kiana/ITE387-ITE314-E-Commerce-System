@@ -207,7 +207,7 @@ unset($_SESSION['cart_error']);
 
                         <div class="mt-auto">
                             <h4 class="text-primary fw-bold">
-                                â‚±<?= number_format((float) $product['price'], 2) ?>
+                                &#8369;<?= number_format((float) $product['price'], 2) ?>
                             </h4>
 
                             <?php if ($stock > 0): ?>

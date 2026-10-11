@@ -171,6 +171,24 @@ footer .container { padding-top: .5rem; padding-bottom: .5rem; }
 .checkout-card .card-body { padding: clamp(1.25rem, 4vw, 2.25rem); }
 .checkout-item-row { gap: 1rem; border-bottom: 1px solid var(--line); }
 .checkout-item-description { display: flex; align-items: center; gap: .75rem; }
+.payment-methods { margin-top: 1.6rem; padding: 0; border: 0; }
+.payment-methods legend { margin-bottom: .75rem; font-size: .92rem; }
+.payment-option { display: flex; align-items: center; gap: .8rem; margin-bottom: .65rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+.payment-option.is-selected { border-color: #83b49a; background: #f4faf6; box-shadow: 0 0 0 2px rgba(23,107,74,.07); }
+.payment-option > input { width: 18px; height: 18px; flex: 0 0 18px; accent-color: var(--green); }
+.payment-option-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 10px; background: var(--mint); color: var(--green); font-size: 1.1rem; font-weight: 800; }
+.payment-option-copy { display: grid; flex: 1; line-height: 1.35; }
+.payment-option-copy strong { font-size: .88rem; }
+.payment-option-copy small { margin-top: .2rem; color: var(--muted); font-size: .73rem; }
+.payment-card-brands { display: flex; gap: .3rem; }
+.payment-card-brands b { padding: .22rem .32rem; border: 1px solid #e2e8e3; border-radius: 4px; background: white; color: #28538a; font-size: .56rem; font-style: italic; }
+.payment-card-brands b + b { color: #b34035; }
+.payment-demo-note { margin: .8rem 0 1rem; padding: .7rem .85rem; border-radius: 9px; background: #f4f6f4; color: #66736b; font-size: .75rem; }
+.card-entry-panel[hidden] { display: none; }
+.card-entry-panel { padding: 1rem; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfb; }
+.card-entry-panel .form-control { background: white; }
+.payment-test-hint { margin: .8rem 0 0; color: var(--muted); font-size: .72rem; }
+.checkout-submit:disabled { opacity: .75; cursor: wait; }
 .checkout-page > .alert-success { padding: 1.5rem; border: 1px solid #cde4d3; background: #eff8f0; color: var(--green-dark); }
 .admin-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: .5rem 0 2rem; }
 .admin-heading p:not(.cart-eyebrow) { color: var(--muted); }

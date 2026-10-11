@@ -8,13 +8,70 @@ require_login();
 
 $error = '';
 $orderId = null;
+$selectedPaymentMethod = in_array($_POST['payment_method'] ?? 'cod', ['card', 'cod'], true)
+    ? $_POST['payment_method']
+    : 'cod';
+$paymentConfirmation = '';
+
+function checkout_card_number_is_valid(string $number): bool
+{
+    if (!preg_match('/^\d{13,19}$/', $number)) {
+        return false;
+    }
+
+    $sum = 0;
+    $doubleDigit = false;
+    for ($index = strlen($number) - 1; $index >= 0; $index--) {
+        $digit = (int) $number[$index];
+        if ($doubleDigit) {
+            $digit *= 2;
+            if ($digit > 9) {
+                $digit -= 9;
+            }
+        }
+        $sum += $digit;
+        $doubleDigit = !$doubleDigit;
+    }
+
+    return $sum % 10 === 0;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
     $couponCode = strtoupper(trim($_POST['coupon_code'] ?? ''));
+    $paymentMethod = (string) ($_POST['payment_method'] ?? '');
 
     try {
+        if (!in_array($paymentMethod, ['card', 'cod'], true)) {
+            throw new RuntimeException('Choose a payment method to continue.');
+        }
+
+        if ($paymentMethod === 'card') {
+            $cardholder = trim((string) ($_POST['cardholder'] ?? ''));
+            $cardNumber = preg_replace('/\D+/', '', (string) ($_POST['card_number'] ?? ''));
+            $cardExpiry = trim((string) ($_POST['card_expiry'] ?? ''));
+            $cardCvc = trim((string) ($_POST['card_cvc'] ?? ''));
+
+            if ($cardholder === '' || !checkout_card_number_is_valid($cardNumber)) {
+                throw new RuntimeException('Enter a cardholder name and a valid test card number.');
+            }
+            if (!preg_match('/^(0[1-9]|1[0-2])\/(\d{2})$/', $cardExpiry, $expiryParts)) {
+                throw new RuntimeException('Enter the card expiry as MM/YY.');
+            }
+
+            $expiryMonth = (int) $expiryParts[1];
+            $expiryYear = 2000 + (int) $expiryParts[2];
+            $currentYear = (int) date('Y');
+            $currentMonth = (int) date('n');
+            if ($expiryYear < $currentYear || ($expiryYear === $currentYear && $expiryMonth < $currentMonth)) {
+                throw new RuntimeException('This test card has expired.');
+            }
+            if (!preg_match('/^\d{3,4}$/', $cardCvc)) {
+                throw new RuntimeException('Enter a 3 or 4 digit security code.');
+            }
+        }
+
         $pdo->beginTransaction();
 
         // Lock the customer's cart so two checkouts cannot use it at once.
@@ -233,6 +290,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([':cart' => $cartId]);
 
         $pdo->commit();
+        $paymentConfirmation = $paymentMethod === 'card'
+            ? 'Demo card checkout completed. No card details were stored and no payment was collected.'
+            : 'Cash on delivery selected. Payment is due when your order arrives.';
 
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
@@ -298,7 +358,7 @@ foreach ($cartItems as $item) {
             <h2 class="h5">Order placed successfully!</h2>
             Your order number is
             <strong>#<?= (int) $orderId ?></strong>.
-            No payment was collected.
+            <p class="mb-2 mt-2"><?= h($paymentConfirmation) ?></p>
             <a href="orders.php">View Order History</a>
         </div>
 
@@ -313,10 +373,10 @@ foreach ($cartItems as $item) {
                         <span class="checkout-item-description">
                             <img src="<?= h($checkoutImage) ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                             <?= h($item['name']) ?>
-                            × <?= (int) $item['quantity'] ?>
+                            x <?= (int) $item['quantity'] ?>
                         </span>
                         <span>
-                            ₱<?= number_format(
+                            &#8369;<?= number_format(
                                 (float) $item['price'] *
                                 (int) $item['quantity'],
                                 2
@@ -330,7 +390,7 @@ foreach ($cartItems as $item) {
                 <p class="d-flex justify-content-between">
                     <strong>Subtotal</strong>
                     <strong>
-                        ₱<?= number_format($displaySubtotal, 2) ?>
+                        &#8369;<?= number_format($displaySubtotal, 2) ?>
                     </strong>
                 </p>
 
@@ -352,8 +412,33 @@ foreach ($cartItems as $item) {
                         is submitted.
                     </p>
 
-                    <button class="btn btn-primary w-100" type="submit">
-                        Place Order
+                    <fieldset class="payment-methods mb-4">
+                        <legend class="form-label">Payment method</legend>
+                        <label class="payment-option" for="payment-card">
+                            <input type="radio" name="payment_method" id="payment-card" value="card" <?= $selectedPaymentMethod === 'card' ? 'checked' : '' ?>>
+                            <span class="payment-option-icon" aria-hidden="true">CC</span>
+                            <span class="payment-option-copy"><strong>Credit or debit card</strong><small>Visa, Mastercard, or other major cards</small></span>
+                            <span class="payment-card-brands" aria-label="Visa and Mastercard accepted"><b>VISA</b><b>MC</b></span>
+                        </label>
+                        <label class="payment-option" for="payment-cod">
+                            <input type="radio" name="payment_method" id="payment-cod" value="cod" <?= $selectedPaymentMethod === 'cod' ? 'checked' : '' ?>>
+                            <span class="payment-option-icon" aria-hidden="true">&#8369;</span>
+                            <span class="payment-option-copy"><strong>Cash on delivery</strong><small>Pay when your order arrives</small></span>
+                        </label>
+                        <div class="payment-demo-note" role="note">Demo checkout: card payments are simulated. Do not enter real card details; nothing is charged or stored.</div>
+                        <div class="card-entry-panel" id="card-entry-panel" <?= $selectedPaymentMethod === 'card' ? '' : 'hidden' ?>>
+                            <div class="mb-3"><label class="form-label" for="cardholder">Name on card</label><input class="form-control" id="cardholder" name="cardholder" autocomplete="off" placeholder="Alex Morgan" disabled></div>
+                            <div class="mb-3"><label class="form-label" for="card_number">Card number</label><input class="form-control" id="card_number" name="card_number" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" maxlength="23" disabled></div>
+                            <div class="row g-3">
+                                <div class="col-6"><label class="form-label" for="card_expiry">Expiry date</label><input class="form-control" id="card_expiry" name="card_expiry" inputmode="numeric" autocomplete="off" placeholder="MM/YY" maxlength="5" disabled></div>
+                                <div class="col-6"><label class="form-label" for="card_cvc">Security code</label><input class="form-control" id="card_cvc" name="card_cvc" type="password" inputmode="numeric" autocomplete="off" placeholder="CVC" maxlength="4" disabled></div>
+                            </div>
+                            <p class="payment-test-hint">Use demo card 4242 4242 4242 4242, any future expiry, and a 3 digit code.</p>
+                        </div>
+                    </fieldset>
+
+                    <button class="btn btn-primary w-100 checkout-submit" type="submit">
+                        <span class="checkout-submit-label"><?= $selectedPaymentMethod === 'card' ? 'Pay securely' : 'Place order' ?></span>
                     </button>
                 </form>
             </div>
@@ -364,5 +449,6 @@ foreach ($cartItems as $item) {
         </p>
     <?php endif; ?>
 </main>
+<script src="JS/checkout-payment.js"></script>
 </body>
 </html>
