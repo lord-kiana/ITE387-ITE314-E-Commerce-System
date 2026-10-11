@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <p class="mt-3">
-        New here? <a href="register.php">Create an account</a>
+        New here? <a href="<?= h($navUrl('auth/register.php')) ?>">Create an account</a>
     </p>
 </main>
 </body>

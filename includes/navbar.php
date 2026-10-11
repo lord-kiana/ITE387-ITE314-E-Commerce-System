@@ -1,6 +1,6 @@
 <?php
 $navScriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
-if (in_array(basename($navScriptDir), ['admin', 'auth'], true)) {
+if (in_array(strtolower(basename($navScriptDir)), ['admin', 'auth', 'pages'], true)) {
     $navScriptDir = dirname($navScriptDir);
 }
 $navBase = rtrim($navScriptDir, '/.');
@@ -52,7 +52,7 @@ $navPage = basename($_SERVER['SCRIPT_NAME'] ?? '');
             <div class="navbar-actions">
                 <?php if ($navLoggedIn): ?>
                     <a class="nav-cart" href="<?= h($navUrl('cart.php')) ?>" aria-label="Cart, <?= $navCartCount ?> items">
-                        <span aria-hidden="true">Bag</span><span class="cart-count"><?= $navCartCount ?></span>
+                        <span>Cart</span><span class="cart-count"><?= $navCartCount ?></span>
                     </a>
                     <span class="nav-greeting">Hi, <?= h($_SESSION['user_name'] ?? 'there') ?></span>
                     <form action="<?= h($navUrl('auth/logout.php')) ?>" method="post">
