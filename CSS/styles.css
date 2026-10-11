@@ -1,1 +1,157 @@
 
+
+body {
+    background: #f8f9fc;
+    color: #212529;
+    font-family: Arial, sans-serif;
+}
+
+.navbar-brand {
+    letter-spacing: 0.5px;
+}
+
+.hero-section {
+    padding: 85px 0;
+    background: linear-gradient(135deg, #ffffff, #eaf1ff);
+}
+
+.hero-section h1 {
+    max-width: 650px;
+}
+
+.hero-icon {
+    font-size: 150px;
+}
+
+.product-card {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.product-image,
+.product-placeholder {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    background: #edf1f7;
+}
+
+.product-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 65px;
+}
+
+.product-card .card-body {
+    padding: 20px;
+}
+
+.product-card .card-title {
+    min-height: 24px;
+}
+
+.btn-primary {
+    background-color: #2457d6;
+    border-color: #2457d6;
+}
+
+.btn-primary:hover {
+    background-color: #1945b2;
+    border-color: #1945b2;
+}
+
+.login-page {
+    background: linear-gradient(135deg, #e8efff, #f8f9fc);
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 1000px;
+    min-height: 580px;
+    border-radius: 20px;
+    background: #fff;
+}
+
+.login-banner {
+    color: #fff;
+    background: linear-gradient(145deg, #183a9e, #3975f6);
+}
+
+.login-illustration {
+    font-size: 100px;
+    margin-top: 20px;
+}
+
+.login-wrapper .form-control {
+    padding: 12px 14px;
+    border-radius: 9px;
+}
+
+.login-wrapper .btn {
+    border-radius: 9px;
+    padding: 12px;
+}
+
+@media (max-width: 767px) {
+    .hero-section {
+        padding: 55px 0;
+    }
+
+    .login-banner {
+        padding: 30px !important;
+    }
+
+    .login-illustration {
+        font-size: 60px;
+    }
+
+    .login-wrapper {
+        border-radius: 14px;
+    }
+}
+
+/* Product text and image improvements */
+.product-card .card-text {
+    line-height: 1.6;
+}
+
+.product-image {
+    display: block;
+}
+
+.product-card .btn {
+    border-radius: 9px;
+    font-weight: 600;
+}
+
+.product-card .btn:focus-visible,
+.navbar a:focus-visible {
+    outline: 3px solid #80aaff;
+    outline-offset: 3px;
+}
+
+.product-placeholder {
+    color: #2457d6;
+}
+
+/* Prevent long product names from disrupting card layout */
+.product-card .card-title {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575px) {
+    .product-image,
+    .product-placeholder {
+        height: 230px;
+    }
+}

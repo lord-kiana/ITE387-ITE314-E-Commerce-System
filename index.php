@@ -1,18 +1,25 @@
 
 <?php
-require_once 'database.php';
+require_once __DIR__ . '/db/database.php';
 
-$stmt = $pdo->query(
-    "SELECT id, name, description, price, image, stock
-     FROM products
-     ORDER BY created_at DESC"
-);
+try {
+    $stmt = $pdo->query(
+        "SELECT id, name, description, price, image, stock
+         FROM public.products
+         ORDER BY created_at DESC"
+    );
 
-$products = $stmt->fetchAll();
+    $products = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+    error_log('ShopFlow products error: ' . $e->getMessage());
+    $products = [];
+    $productError = true;
+}
 
 function e($value): string
 {
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 ?>
 <!DOCTYPE html>
@@ -26,7 +33,7 @@ function e($value): string
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="CSS/style.css">
 </head>
 <body>
 
@@ -47,7 +54,7 @@ function e($value): string
 
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <span class="navbar-text text-white">
-                        Hello, <?= e($_SESSION['user_name']) ?>
+                        Hello, <?= e($_SESSION['user_name'] ?? 'Customer') ?>
                     </span>
                     <a href="logout.php" class="btn btn-outline-light btn-sm">
                         Logout
@@ -70,7 +77,9 @@ function e($value): string
         <div class="row align-items-center">
             <div class="col-lg-7">
                 <p class="text-primary fw-bold mb-2">WELCOME TO SHOPFLOW</p>
-                <h1 class="display-4 fw-bold">Find your next favorite product.</h1>
+                <h1 class="display-4 fw-bold">
+                    Find your next favorite product.
+                </h1>
                 <p class="lead text-secondary">
                     Discover quality products at prices you'll love.
                     Browse freely and sign in when you're ready to buy.
@@ -79,6 +88,7 @@ function e($value): string
                     Shop Now
                 </a>
             </div>
+
             <div class="col-lg-5 d-none d-lg-block text-center">
                 <div class="hero-icon">🛍️</div>
             </div>
@@ -88,10 +98,16 @@ function e($value): string
 
 <main class="container py-5" id="products">
 
+    <?php if (isset($productError)): ?>
+        <div class="alert alert-warning">
+            We couldn't load the products right now. Please try again later.
+        </div>
+    <?php endif; ?>
+
     <?php if (isset($_GET['buy']) && isset($_SESSION['user_id'])): ?>
         <div class="alert alert-success">
-            You're logged in! You can now continue with your purchase.
-            Checkout will be available once the checkout page is implemented.
+            You're logged in! Checkout will be available once the
+            checkout page is implemented.
         </div>
     <?php endif; ?>
 
@@ -104,14 +120,25 @@ function e($value): string
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">Our Products</h2>
-            <p class="text-secondary mb-0">Explore our latest collection.</p>
+            <p class="text-secondary mb-0">
+                Explore our latest collection.
+            </p>
         </div>
+
         <span class="badge bg-primary rounded-pill">
             <?= count($products) ?> Products
         </span>
     </div>
 
     <div class="row g-4">
+
+        <?php if (empty($products) && !isset($productError)): ?>
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No products are available yet.
+                </div>
+            </div>
+        <?php endif; ?>
 
         <?php foreach ($products as $product): ?>
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
@@ -133,21 +160,21 @@ function e($value): string
                         </h5>
 
                         <p class="card-text text-secondary small">
-                            <?= e($product['description']) ?>
+                            <?= e($product['description'] ?? '') ?>
                         </p>
 
                         <div class="mt-auto">
                             <h4 class="text-primary fw-bold">
-                                ₱<?= number_format((float)$product['price'], 2) ?>
+                                ₱<?= number_format((float) $product['price'], 2) ?>
                             </h4>
 
-                            <?php if ($product['stock'] > 0): ?>
+                            <?php if ((int) $product['stock'] > 0): ?>
                                 <p class="small text-success">
-                                    In stock: <?= (int)$product['stock'] ?>
+                                    In stock: <?= (int) $product['stock'] ?>
                                 </p>
 
                                 <a
-                                    href="login.php?buy=<?= (int)$product['id'] ?>"
+                                    href="login.php?buy=<?= (int) $product['id'] ?>"
                                     class="btn btn-primary w-100">
                                     Buy Now
                                 </a>
@@ -176,6 +203,5 @@ function e($value): string
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
