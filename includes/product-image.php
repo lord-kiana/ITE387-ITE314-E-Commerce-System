@@ -1,4 +1,22 @@
 <?php
+function product_category(array $product): string
+{
+    $searchable = strtolower(
+        (string) ($product['name'] ?? $product['product_name'] ?? '') . ' ' .
+        (string) ($product['description'] ?? '')
+    );
+
+    if (preg_match('/\b(sneakers?|shoes?|footwear|jordans?|nike|adidas)\b/i', $searchable)) {
+        return 'Shoes';
+    }
+
+    if (preg_match('/\b(bags?|handbags?|backpacks?|purses?|satchels?|totes?)\b/i', $searchable)) {
+        return 'Bags';
+    }
+
+    return 'Other';
+}
+
 function product_image_url(array $product, string $assetPrefix = ''): string
 {
     $name = (string) ($product['name'] ?? $product['product_name'] ?? '');

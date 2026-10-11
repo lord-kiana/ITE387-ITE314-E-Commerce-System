@@ -157,6 +157,12 @@ unset($_SESSION['cart_error']);
         </span>
     </div>
 
+    <nav class="product-category-filters" aria-label="Filter products by category">
+        <button class="category-filter is-active" type="button" data-category-filter="all" aria-pressed="true">All products</button>
+        <button class="category-filter" type="button" data-category-filter="shoes" aria-pressed="false">Shoes</button>
+        <button class="category-filter" type="button" data-category-filter="bags" aria-pressed="false">Bags</button>
+    </nav>
+
     <div class="row g-4">
 
         <?php if (empty($products) && !isset($productError)): ?>
@@ -176,7 +182,8 @@ unset($_SESSION['cart_error']);
             ?>
 
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 product-result"
-                 data-product-search="<?= e($product['name'] . ' ' . ($product['description'] ?? '')) ?>">
+                 data-product-search="<?= e($product['name'] . ' ' . ($product['description'] ?? '')) ?>"
+                 data-product-category="<?= e(strtolower(product_category($product))) ?>">
                 <div class="card product-card h-100">
 
                     <img
@@ -187,6 +194,9 @@ unset($_SESSION['cart_error']);
                         onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
 
                     <div class="card-body d-flex flex-column">
+                        <?php if (product_category($product) !== 'Other'): ?>
+                            <span class="product-category-badge"><?= e(product_category($product)) ?></span>
+                        <?php endif; ?>
                         <h5 class="card-title fw-bold">
                             <?= e($product['name']) ?>
                         </h5>

@@ -77,6 +77,11 @@ main.container { padding-top: 3.5rem !important; padding-bottom: 4rem !important
 #products h2 { font-size: clamp(1.7rem, 3vw, 2.25rem); }
 #products .text-secondary { color: var(--muted) !important; }
 #products > .d-flex > .badge { padding: .65rem .9rem; background: var(--mint) !important; color: var(--green); font-size: .78rem; }
+.product-category-filters { display: flex; flex-wrap: wrap; gap: .55rem; margin: -1.1rem 0 1.5rem; }
+.category-filter { padding: .55rem 1rem; border: 1px solid #dce6df; border-radius: 999px; background: white; color: #526158; font: inherit; font-size: .88rem; font-weight: 700; transition: color .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.category-filter:hover { border-color: #9dbca8; color: var(--green); }
+.category-filter.is-active { border-color: var(--green); background: var(--green); color: white; box-shadow: 0 5px 14px rgba(23,107,74,.15); }
+.product-category-badge { display: inline-flex; align-self: flex-start; margin-bottom: .65rem; padding: .25rem .65rem; border-radius: 999px; background: var(--mint); color: var(--green-dark); font-size: .7rem; font-weight: 800; letter-spacing: .03em; }
 .product-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 5px 20px rgba(25,54,39,.035); transition: transform .22s ease, box-shadow .22s ease; }
 .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
 .product-image, .product-placeholder { display: block; width: 100%; height: 235px; object-fit: cover; background: #edf2ed; }
@@ -178,7 +183,7 @@ footer .container { padding-top: .5rem; padding-bottom: .5rem; }
 .admin-section-heading h2 { margin: 0 0 .25rem; font-size: 1.25rem; font-weight: 800; }
 .admin-section-heading p { margin: 0; color: var(--muted); font-size: .85rem; }
 .admin-table-card, .admin-form-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 6px 24px rgba(25,54,39,.045); }
-.admin-table { min-width: 760px; }
+.admin-table { min-width: 850px; }
 .admin-table thead th { padding: .95rem 1rem; border-bottom: 1px solid var(--line); background: #f8faf8; }
 .admin-table tbody td { padding: .9rem 1rem; border-color: #edf0ed; }
 .admin-table tbody tr:last-child td { border-bottom: 0; }
