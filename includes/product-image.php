@@ -47,8 +47,12 @@ function product_image_url(array $product, string $assetPrefix = ''): string
         return $assetPrefix . 'assets/product-laptop.jpg';
     }
 
+    if (preg_match('/\b(vans|slip[- ]?ons?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-vans-slipons.jpg';
+    }
+
     if (preg_match('/\b(sneakers?|shoes?|footwear|jordans?|nike|adidas)\b/i', $searchable)) {
-        return $assetPrefix . 'assets/carousel-sneakers.jpg';
+        return $assetPrefix . 'assets/product-black-sneakers.jpg';
     }
 
     if (preg_match('/\b(phones?|mobiles?|smartphones?|iphones?|android|samsung|galaxies|galaxy|pixels?|tablets?|earbuds?|airpods|chargers?)\b/i', $searchable)) {
