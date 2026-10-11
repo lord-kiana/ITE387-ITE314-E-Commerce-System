@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <p class="mt-3">
-        Already registered? <a href="<?= h($navUrl('auth/login.php')) ?>">Log in</a>
+        Already registered? <a href="/auth/login.php">Log in</a>
     </p>
 </main>
 </body>
