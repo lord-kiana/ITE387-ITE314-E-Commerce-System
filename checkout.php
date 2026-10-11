@@ -2,6 +2,7 @@
 <?php
 require_once __DIR__ . '/db/database.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/product-image.php';
 
 require_login();
 
@@ -307,9 +308,10 @@ foreach ($cartItems as $item) {
                 <h2 class="h5">Order Summary</h2>
 
                 <?php foreach ($cartItems as $item): ?>
+                    <?php $checkoutImage = product_image_url($item); ?>
                     <div class="d-flex justify-content-between align-items-center py-2 checkout-item-row">
                         <span class="checkout-item-description">
-                            <img src="<?= !empty($item['image']) ? h($item['image']) : 'assets/product-placeholder.svg' ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
+                            <img src="<?= h($checkoutImage) ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                             <?= h($item['name']) ?>
                             × <?= (int) $item['quantity'] ?>
                         </span>

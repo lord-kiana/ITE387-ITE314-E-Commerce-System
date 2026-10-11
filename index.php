@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db/database.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/product-image.php';
 
 $searchQuery = trim((string) ($_GET['q'] ?? ''));
 
@@ -171,22 +172,19 @@ unset($_SESSION['cart_error']);
             <?php
                 $productId = (int) $product['id'];
                 $stock = (int) $product['stock'];
+                $productImage = product_image_url($product);
             ?>
 
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 product-result"
                  data-product-search="<?= e($product['name'] . ' ' . ($product['description'] ?? '')) ?>">
                 <div class="card product-card h-100">
 
-                    <?php if (!empty($product['image'])): ?>
-                        <img
-                            src="<?= e($product['image']) ?>"
-                            class="card-img-top product-image"
-                            alt="<?= e($product['name']) ?>"
-                            loading="lazy"
-                            onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
-                    <?php else: ?>
-                        <div class="product-placeholder" role="img" aria-label="ShopFlow product illustration"></div>
-                    <?php endif; ?>
+                    <img
+                        src="<?= e($productImage) ?>"
+                        class="card-img-top product-image"
+                        alt="<?= e($product['name']) ?>"
+                        loading="lazy"
+                        onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
 
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title fw-bold">

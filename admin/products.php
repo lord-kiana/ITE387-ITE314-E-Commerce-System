@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../db/database.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/product-image.php';
 
 require_admin();
 
@@ -163,8 +164,9 @@ $totalStock = array_sum(array_map(static fn ($product) => (int) $product['stock'
                     <thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
                     <tbody>
                     <?php foreach ($products as $product): ?>
+                        <?php $adminProductImage = product_image_url($product, '../'); ?>
                         <tr>
-                            <td><div class="admin-product-cell"><img src="<?= !empty($product['image']) ? h($product['image']) : '../assets/product-placeholder.svg' ?>" alt="" onerror="this.onerror=null;this.src='../assets/product-placeholder.svg'"><div><strong><?= h($product['name']) ?></strong><small><?= h($product['description'] ?? '') ?></small></div></div></td>
+                            <td><div class="admin-product-cell"><img src="<?= h($adminProductImage) ?>" alt="" onerror="this.onerror=null;this.src='../assets/product-placeholder.svg'"><div><strong><?= h($product['name']) ?></strong><small><?= h($product['description'] ?? '') ?></small></div></div></td>
                             <td class="admin-price">PHP <?= number_format((float) $product['price'], 2) ?></td>
                             <td><?= (int) $product['stock'] ?></td>
                             <td><span class="stock-badge <?= (int) $product['stock'] > 0 ? 'is-available' : 'is-empty' ?>"><?= (int) $product['stock'] > 0 ? 'In stock' : 'Out of stock' ?></span></td>

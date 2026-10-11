@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db/database.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/product-image.php';
 
 require_login();
 
@@ -69,9 +70,10 @@ unset($_SESSION['cart_error']);
             <section class="col-lg-8" aria-label="Cart items">
                 <div class="cart-items">
                     <?php foreach ($items as $item): ?>
+                        <?php $cartImage = product_image_url($item); ?>
                         <article class="cart-item">
                             <img class="cart-item-image"
-                                 src="<?= !empty($item['image']) ? h($item['image']) : 'assets/product-placeholder.svg' ?>"
+                                 src="<?= h($cartImage) ?>"
                                  alt="<?= h($item['name']) ?>"
                                  onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                             <div class="cart-item-info">

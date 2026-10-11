@@ -2,6 +2,7 @@
 <?php
 require_once __DIR__ . '/db/database.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/product-image.php';
 
 require_login();
 
@@ -69,8 +70,9 @@ $orders = $stmt->fetchAll();
 
                 <ul>
                     <?php foreach ($orderItems as $item): ?>
+                        <?php $orderImage = product_image_url($item); ?>
                         <li class="order-item-row">
-                            <img src="<?= !empty($item['image']) ? h($item['image']) : 'assets/product-placeholder.svg' ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
+                            <img src="<?= h($orderImage) ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                             <span><?= h($item['product_name']) ?><small>Qty <?= (int) $item['quantity'] ?></small></span>
                             <strong>₱<?= number_format((float) $item['line_total'], 2) ?></strong>
                         </li>
