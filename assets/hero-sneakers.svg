@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="30" x2="755" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="#F6F3EA"/><stop offset="1" stop-color="#EEE1CD"/></linearGradient>
+    <linearGradient id="shoe" x1="210" y1="234" x2="590" y2="468" gradientUnits="userSpaceOnUse"><stop stop-color="#FDFCF7"/><stop offset="1" stop-color="#DCE5DC"/></linearGradient>
+    <filter id="shadow" x="95" y="418" width="620" height="126" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="20"/></filter>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h800v620H0z"/><circle cx="600" cy="165" r="145" fill="#E7D7B8" fill-opacity=".7"/>
+  <ellipse cx="405" cy="475" fill="#705D43" fill-opacity=".2" rx="250" ry="32" filter="url(#shadow)"/>
+  <path d="M94 443h612v43H94z" fill="#D9C9AE"/><path d="M133 486h535v35H133z" fill="#C7B597"/>
+  <path d="M140 388c50-15 92-53 125-125l38-83c8-18 30-25 46-13l94 67c33 24 69 42 108 54l77 23c31 9 54 33 63 64l8 30c5 21-11 41-33 41H169c-37 0-57-47-29-58Z" fill="url(#shoe)" stroke="#AAB9AB" stroke-width="7"/>
+  <path d="M264 273c41 19 79 38 120 60 33 18 73 30 112 36l117 17" stroke="#3C785A" stroke-width="16" stroke-linecap="round"/>
+  <path d="m319 207 39 54m2-65 39 56m4-65 39 56" stroke="#D98A56" stroke-width="11" stroke-linecap="round"/>
+  <path d="M131 422c73 10 158 13 253 10 108-2 209-9 304-22" stroke="#F7F8F0" stroke-width="14" stroke-linecap="round"/>
+  <path d="M198 390c34-7 64-26 90-57" stroke="#B0C2B1" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="164" cy="160" r="11" fill="#DB8A55"/><circle cx="652" cy="303" r="8" fill="#789B78"/>
+  <path d="M615 192c17-38 45-60 82-66-8 39-33 63-77 73" fill="#88A88A"/>
+</svg>

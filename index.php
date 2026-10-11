@@ -48,7 +48,7 @@ unset($_SESSION['cart_error']);
 <header class="hero-section">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-7">
+            <div class="col-lg-6">
                 <p class="text-primary fw-bold mb-2">
                     WELCOME TO SHOPFLOW
                 </p>
@@ -65,6 +65,43 @@ unset($_SESSION['cart_error']);
                 <a href="#products" class="btn btn-primary btn-lg mt-2">
                     Shop Now
                 </a>
+            </div>
+
+            <div class="col-lg-6">
+                <div id="shopProductCarousel" class="carousel slide carousel-fade hero-carousel"
+                     data-bs-ride="carousel" data-bs-interval="4200" data-bs-pause="hover">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Phone"></button>
+                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="1" aria-label="Sneakers"></button>
+                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="2" aria-label="Headphones"></button>
+                    </div>
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="hero-product-frame">
+                                <img src="assets/hero-phone.svg" alt="A modern smartphone on a display stand" fetchpriority="high">
+                                <span class="hero-product-label">Everyday tech</span>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="hero-product-frame">
+                                <img src="assets/hero-sneakers.svg" alt="A pair of fresh everyday sneakers" loading="lazy">
+                                <span class="hero-product-label">Step into comfort</span>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="hero-product-frame">
+                                <img src="assets/hero-headphones.svg" alt="Over-ear wireless headphones" loading="lazy">
+                                <span class="hero-product-label">Sound your way</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#shopProductCarousel" data-bs-slide="prev" aria-label="Previous product image">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#shopProductCarousel" data-bs-slide="next" aria-label="Next product image">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
