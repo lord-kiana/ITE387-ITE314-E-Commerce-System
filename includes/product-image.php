@@ -47,6 +47,22 @@ function product_image_url(array $product, string $assetPrefix = ''): string
         return $assetPrefix . 'assets/product-laptop.jpg';
     }
 
+    if (preg_match('/\b(running shoes?|athletic shoes?|trainers?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-running-shoes.jpg';
+    }
+
+    if (preg_match('/\b(high[- ]?tops?|high[- ]?top sneakers?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-high-top-sneakers.jpg';
+    }
+
+    if (preg_match('/\b(formal shoes?|dress shoes?|leather shoes?|oxfords?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-leather-formal-shoes.jpg';
+    }
+
+    if (preg_match('/\b(casual shoes?|black casual shoes?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-black-casual-shoes.jpg';
+    }
+
     if (preg_match('/\b(vans|slip[- ]?ons?)\b/i', $searchable)) {
         return $assetPrefix . 'assets/product-vans-slipons.jpg';
     }
