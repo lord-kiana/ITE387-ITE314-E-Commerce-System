@@ -5,20 +5,28 @@ function product_image_url(array $product, string $assetPrefix = ''): string
     $description = (string) ($product['description'] ?? '');
     $searchable = strtolower($name . ' ' . $description);
 
-    if (preg_match('/\b(usb|usb-c|hub|adapter|dongle|dock|docking station)\b/i', $searchable)) {
-        return $assetPrefix . 'assets/product-usb-hub.jpg';
+    if (preg_match('/\b(mice|mouses?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-wireless-mouse.jpg';
     }
 
-    if (preg_match('/\b(headphones?|headsets?|gaming headset)\b/i', $searchable)) {
+    if (preg_match('/\b(gaming\s+headphones?|headsets?)\b/i', $searchable)) {
         return $assetPrefix . 'assets/product-gaming-headset.jpg';
     }
 
-    if (preg_match('/\b(laptops?|notebooks?|computers?)\b/i', $searchable)) {
-        return $assetPrefix . 'assets/product-laptop.jpg';
+    if (preg_match('/\bheadphones?\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-sony-headphones.jpg';
     }
 
     if (preg_match('/\b(keyboards?|keycaps?)\b/i', $searchable)) {
         return $assetPrefix . 'assets/product-keyboard.jpg';
+    }
+
+    if (preg_match('/\b((?:usb[- ]c )?hub|adapters?|dongles?|docks?|docking station)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-usb-hub.jpg';
+    }
+
+    if (preg_match('/\b(laptops?|notebooks?|computers?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-laptop.jpg';
     }
 
     if (preg_match('/\b(sneakers?|shoes?|footwear|jordans?|nike|adidas)\b/i', $searchable)) {
