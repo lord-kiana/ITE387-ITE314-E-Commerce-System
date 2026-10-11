@@ -5,6 +5,10 @@ function product_image_url(array $product, string $assetPrefix = ''): string
     $description = (string) ($product['description'] ?? '');
     $searchable = strtolower($name . ' ' . $description);
 
+    if (preg_match('/\b(keyboards?|keycaps?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-keyboard.jpg';
+    }
+
     if (preg_match('/\b(sneakers?|shoes?|footwear|jordans?|nike|adidas)\b/i', $searchable)) {
         return $assetPrefix . 'assets/carousel-sneakers.jpg';
     }
