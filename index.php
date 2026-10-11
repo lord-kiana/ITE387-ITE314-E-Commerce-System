@@ -1,13 +1,30 @@
-
 <?php
 require_once __DIR__ . '/db/database.php';
+require_once __DIR__ . '/includes/auth.php';
+
+$searchQuery = trim((string) ($_GET['q'] ?? ''));
 
 try {
-    $stmt = $pdo->query(
-        "SELECT id, name, description, price, image, stock
-         FROM public.products
-         ORDER BY created_at DESC"
-    );
+    if ($searchQuery !== '') {
+        $stmt = $pdo->prepare(
+            "SELECT id, name, description, price, image, stock
+             FROM public.products
+             WHERE name ILIKE :name_query
+                OR COALESCE(description, '') ILIKE :description_query
+             ORDER BY created_at DESC"
+        );
+        $searchTerm = '%' . $searchQuery . '%';
+        $stmt->execute([
+            ':name_query' => $searchTerm,
+            ':description_query' => $searchTerm,
+        ]);
+    } else {
+        $stmt = $pdo->query(
+            "SELECT id, name, description, price, image, stock
+             FROM public.products
+             ORDER BY created_at DESC"
+        );
+    }
 
     $products = $stmt->fetchAll();
 
@@ -21,6 +38,10 @@ function e($value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
+
+$isLoggedIn = !empty($_SESSION['user_id']);
+$cartMessage = $_SESSION['cart_error'] ?? '';
+unset($_SESSION['cart_error']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,64 +54,32 @@ function e($value): string
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/styles.css">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.php">ShopFlow</a>
-
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarMenu"
-                aria-controls="navbarMenu" aria-expanded="false"
-                aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarMenu">
-            <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                <a class="nav-link active" href="index.php">Products</a>
-
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <span class="navbar-text text-white">
-                        Hello, <?= e($_SESSION['user_name'] ?? 'Customer') ?>
-                    </span>
-                    <a href="logout.php" class="btn btn-outline-light btn-sm">
-                        Logout
-                    </a>
-                <?php else: ?>
-                    <a href="login.php" class="btn btn-outline-light btn-sm">
-                        Login
-                    </a>
-                    <a href="register.php" class="btn btn-primary btn-sm">
-                        Create Account
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</nav>
+<?php require __DIR__ . '/includes/navbar.php'; ?>
 
 <header class="hero-section">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-7">
-                <p class="text-primary fw-bold mb-2">WELCOME TO SHOPFLOW</p>
+                <p class="text-primary fw-bold mb-2">
+                    WELCOME TO SHOPFLOW
+                </p>
+
                 <h1 class="display-4 fw-bold">
                     Find your next favorite product.
                 </h1>
+
                 <p class="lead text-secondary">
                     Discover quality products at prices you'll love.
                     Browse freely and sign in when you're ready to buy.
                 </p>
+
                 <a href="#products" class="btn btn-primary btn-lg mt-2">
                     Shop Now
                 </a>
-            </div>
-
-            <div class="col-lg-5 d-none d-lg-block text-center">
-                <div class="hero-icon">🛍️</div>
             </div>
         </div>
     </div>
@@ -104,10 +93,11 @@ function e($value): string
         </div>
     <?php endif; ?>
 
-    <?php if (isset($_GET['buy']) && isset($_SESSION['user_id'])): ?>
-        <div class="alert alert-success">
-            You're logged in! Checkout will be available once the
-            checkout page is implemented.
+    <?php if ($cartMessage !== ''): ?>
+        <div class="alert alert-warning alert-dismissible fade show">
+            <?= e($cartMessage) ?>
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
 
@@ -117,16 +107,29 @@ function e($value): string
         </div>
     <?php endif; ?>
 
+    <?php if (isset($_GET['login'])): ?>
+        <div class="alert alert-info">
+            Please log in to add products to your shopping cart.
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['added'])): ?>
+        <div class="alert alert-success">
+            Product added to your cart successfully.
+            <a href="cart.php" class="alert-link">View Cart</a>
+        </div>
+    <?php endif; ?>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Our Products</h2>
+            <h2 class="fw-bold mb-1"><?= $searchQuery !== '' ? 'Search results' : 'Our Products' ?></h2>
             <p class="text-secondary mb-0">
-                Explore our latest collection.
+                <?= $searchQuery !== '' ? 'Showing matches for “' . e($searchQuery) . '”.' : 'Explore our latest collection.' ?>
             </p>
         </div>
 
         <span class="badge bg-primary rounded-pill">
-            <?= count($products) ?> Products
+            <?= count($products) ?> <?= count($products) === 1 ? 'Product' : 'Products' ?>
         </span>
     </div>
 
@@ -135,12 +138,18 @@ function e($value): string
         <?php if (empty($products) && !isset($productError)): ?>
             <div class="col-12">
                 <div class="alert alert-info">
-                    No products are available yet.
+                    <?= $searchQuery !== '' ? 'No products matched your search. Try another name or keyword.' : 'No products are available yet.' ?>
+                    <?php if ($searchQuery !== ''): ?> <a href="index.php" class="alert-link">Clear search</a><?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>
 
         <?php foreach ($products as $product): ?>
+            <?php
+                $productId = (int) $product['id'];
+                $stock = (int) $product['stock'];
+            ?>
+
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                 <div class="card product-card h-100">
 
@@ -149,9 +158,10 @@ function e($value): string
                             src="<?= e($product['image']) ?>"
                             class="card-img-top product-image"
                             alt="<?= e($product['name']) ?>"
-                            loading="lazy">
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                     <?php else: ?>
-                        <div class="product-placeholder">🛍️</div>
+                        <div class="product-placeholder" role="img" aria-label="ShopFlow product illustration"></div>
                     <?php endif; ?>
 
                     <div class="card-body d-flex flex-column">
@@ -165,21 +175,55 @@ function e($value): string
 
                         <div class="mt-auto">
                             <h4 class="text-primary fw-bold">
-                                ₱<?= number_format((float) $product['price'], 2) ?>
+                                â‚±<?= number_format((float) $product['price'], 2) ?>
                             </h4>
 
-                            <?php if ((int) $product['stock'] > 0): ?>
+                            <?php if ($stock > 0): ?>
                                 <p class="small text-success">
-                                    In stock: <?= (int) $product['stock'] ?>
+                                    In stock:
+                                    <span data-product-stock="<?= $productId ?>">
+                                        <?= $stock ?>
+                                    </span>
                                 </p>
 
-                                <a
-                                    href="login.php?buy=<?= (int) $product['id'] ?>"
-                                    class="btn btn-primary w-100">
-                                    Buy Now
-                                </a>
+                                <?php if ($isLoggedIn): ?>
+                                    <form action="cart_add.php" method="post">
+                                        <input type="hidden" name="csrf_token"
+                                               value="<?= e(csrf_token()) ?>">
+
+                                        <input type="hidden" name="product_id"
+                                               value="<?= $productId ?>">
+
+                                        <label class="form-label small"
+                                               for="quantity-<?= $productId ?>">
+                                            Quantity
+                                        </label>
+
+                                        <input
+                                            class="form-control mb-2"
+                                            type="number"
+                                            id="quantity-<?= $productId ?>"
+                                            name="quantity"
+                                            value="1"
+                                            min="1"
+                                            max="<?= min(99, $stock) ?>"
+                                            required>
+
+                                        <button type="submit"
+                                                class="btn btn-primary w-100">
+                                            Add to Cart
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <a href="auth/login.php?buy=<?= $productId ?>"
+                                       class="btn btn-primary w-100">
+                                        Buy Now
+                                    </a>
+                                <?php endif; ?>
+
                             <?php else: ?>
                                 <p class="small text-danger">Out of stock</p>
+
                                 <button class="btn btn-secondary w-100" disabled>
                                     Out of Stock
                                 </button>
@@ -202,6 +246,7 @@ function e($value): string
     </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="assets/firebase-inventory.js"></script>
+
 </body>
 </html>

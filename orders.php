@@ -23,23 +23,25 @@ $orders = $stmt->fetchAll();
     <title>Order History | ShopFlow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
+    <link rel="stylesheet" href="CSS/styles.css">
 </head>
 <body>
-<main class="container py-5">
-    <div class="d-flex justify-content-between mb-4">
-        <h1>Order History</h1>
-        <a href="index.php">ShopFlow</a>
+<?php require __DIR__ . '/includes/navbar.php'; ?>
+<main class="container orders-page">
+    <div class="page-heading">
+        <div><p class="cart-eyebrow">YOUR ACCOUNT</p><h1>Order history</h1><p class="text-secondary mb-0">A look back at everything you’ve ordered.</p></div>
+        <a href="index.php" class="btn btn-outline-primary">Continue shopping</a>
     </div>
 
     <?php if (!$orders): ?>
-        <p>You have not placed any orders yet.</p>
+        <section class="orders-empty"><img src="assets/product-placeholder.svg" alt=""><h2>No orders yet</h2><p>Your orders will show up here after checkout.</p><a href="index.php" class="btn btn-primary">Browse products</a></section>
     <?php endif; ?>
 
     <?php foreach ($orders as $order): ?>
-        <section class="card mb-4">
+        <section class="card order-card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
-                    <h2 class="h5">
+                    <h2 class="h5 order-number">
                         Order #<?= (int) $order['id'] ?>
                     </h2>
                     <span class="badge text-bg-secondary">
@@ -47,17 +49,18 @@ $orders = $stmt->fetchAll();
                     </span>
                 </div>
 
-                <p class="text-muted">
+                <p class="text-muted order-date">
                     <?= h($order['created_at']) ?>
                 </p>
 
                 <?php
                 $stmt = $pdo->prepare(
-                    'SELECT product_name, unit_price,
-                            quantity, line_total
-                     FROM public.order_items
-                     WHERE order_id = :oid
-                     ORDER BY id'
+                    'SELECT oi.product_name, oi.unit_price,
+                            oi.quantity, oi.line_total, p.image
+                     FROM public.order_items oi
+                     LEFT JOIN public.products p ON p.id = oi.product_id
+                     WHERE oi.order_id = :oid
+                     ORDER BY oi.id'
                 );
 
                 $stmt->execute([':oid' => $order['id']]);
@@ -66,17 +69,10 @@ $orders = $stmt->fetchAll();
 
                 <ul>
                     <?php foreach ($orderItems as $item): ?>
-                        <li>
-                            <?= h($item['product_name']) ?>
-                            — <?= (int) $item['quantity'] ?> ×
-                            ₱<?= number_format(
-                                (float) $item['unit_price'],
-                                2
-                            ) ?>
-                            = ₱<?= number_format(
-                                (float) $item['line_total'],
-                                2
-                            ) ?>
+                        <li class="order-item-row">
+                            <img src="<?= !empty($item['image']) ? h($item['image']) : 'assets/product-placeholder.svg' ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
+                            <span><?= h($item['product_name']) ?><small>Qty <?= (int) $item['quantity'] ?></small></span>
+                            <strong>₱<?= number_format((float) $item['line_total'], 2) ?></strong>
                         </li>
                     <?php endforeach; ?>
                 </ul>

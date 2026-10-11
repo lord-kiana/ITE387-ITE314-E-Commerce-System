@@ -252,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get the current cart for display.
 $stmt = $pdo->prepare(
-    'SELECT p.name, p.price, ci.quantity
+    'SELECT p.name, p.price, p.image, ci.quantity
      FROM public.carts c
      JOIN public.cart_items ci ON ci.cart_id = c.id
      JOIN public.products p ON p.id = ci.product_id
@@ -276,11 +276,15 @@ foreach ($cartItems as $item) {
     <title>Checkout | ShopFlow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
+    <link rel="stylesheet" href="CSS/styles.css">
 </head>
 <body>
-<main class="container py-5" style="max-width: 760px">
-    <h1>Checkout</h1>
-    <a href="cart.php">Back to Cart</a>
+<?php require __DIR__ . '/includes/navbar.php'; ?>
+<main class="container checkout-page" style="max-width: 900px">
+    <div class="page-heading">
+        <div><p class="cart-eyebrow">ALMOST THERE</p><h1>Checkout</h1><p class="text-secondary mb-0">Confirm your order details below.</p></div>
+        <a href="cart.php" class="btn btn-outline-primary">Back to cart</a>
+    </div>
 
     <?php if ($error): ?>
         <div class="alert alert-danger mt-3">
@@ -298,13 +302,14 @@ foreach ($cartItems as $item) {
         </div>
 
     <?php elseif ($cartItems): ?>
-        <div class="card mt-4">
+        <div class="card checkout-card mt-4">
             <div class="card-body">
                 <h2 class="h5">Order Summary</h2>
 
                 <?php foreach ($cartItems as $item): ?>
-                    <div class="d-flex justify-content-between py-2">
-                        <span>
+                    <div class="d-flex justify-content-between align-items-center py-2 checkout-item-row">
+                        <span class="checkout-item-description">
+                            <img src="<?= !empty($item['image']) ? h($item['image']) : 'assets/product-placeholder.svg' ?>" alt="" onerror="this.onerror=null;this.src='assets/product-placeholder.svg'">
                             <?= h($item['name']) ?>
                             × <?= (int) $item['quantity'] ?>
                         </span>
