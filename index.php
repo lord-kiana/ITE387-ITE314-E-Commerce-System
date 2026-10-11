@@ -71,27 +71,27 @@ unset($_SESSION['cart_error']);
                 <div id="shopProductCarousel" class="carousel slide carousel-fade hero-carousel"
                      data-bs-ride="carousel" data-bs-interval="4200" data-bs-pause="hover">
                     <div class="carousel-indicators">
-                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Phone"></button>
-                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="1" aria-label="Sneakers"></button>
-                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="2" aria-label="Headphones"></button>
+                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Sneakers"></button>
+                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="1" aria-label="Phone and accessories"></button>
+                        <button type="button" data-bs-target="#shopProductCarousel" data-bs-slide-to="2" aria-label="Leather bag"></button>
                     </div>
                     <div class="carousel-inner">
                         <div class="carousel-item active">
                             <div class="hero-product-frame">
-                                <img src="assets/hero-phone.svg" alt="A modern smartphone on a display stand" fetchpriority="high">
-                                <span class="hero-product-label">Everyday tech</span>
+                                <img src="assets/carousel-sneakers.jpg" alt="Red, black, and white sneakers" fetchpriority="high">
+                                <span class="hero-product-label">Featured sneakers</span>
                             </div>
                         </div>
                         <div class="carousel-item">
                             <div class="hero-product-frame">
-                                <img src="assets/hero-sneakers.svg" alt="A pair of fresh everyday sneakers" loading="lazy">
-                                <span class="hero-product-label">Step into comfort</span>
+                                <img src="assets/carousel-phone-tech.jpg" alt="Smartphone, smartwatch, earbuds, and charging cable" loading="lazy">
+                                <span class="hero-product-label">Phones and tech</span>
                             </div>
                         </div>
                         <div class="carousel-item">
                             <div class="hero-product-frame">
-                                <img src="assets/hero-headphones.svg" alt="Over-ear wireless headphones" loading="lazy">
-                                <span class="hero-product-label">Sound your way</span>
+                                <img src="assets/carousel-bag.jpg" alt="Brown leather shoulder bag" loading="lazy">
+                                <span class="hero-product-label">Everyday carry</span>
                             </div>
                         </div>
                     </div>
