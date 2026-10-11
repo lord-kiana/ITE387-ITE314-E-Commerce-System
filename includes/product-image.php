@@ -47,6 +47,10 @@ function product_image_url(array $product, string $assetPrefix = ''): string
         return $assetPrefix . 'assets/product-laptop.jpg';
     }
 
+    if (preg_match('/\bwhite\b/i', $searchable) && preg_match('/\b(sneakers?|shoes?|footwear)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-white-sneakers.jpg';
+    }
+
     if (preg_match('/\b(running shoes?|athletic shoes?|trainers?)\b/i', $searchable)) {
         return $assetPrefix . 'assets/product-running-shoes.jpg';
     }
@@ -75,8 +79,24 @@ function product_image_url(array $product, string $assetPrefix = ''): string
         return $assetPrefix . 'assets/carousel-phone-tech.jpg';
     }
 
-    if (preg_match('/\b(bags?|handbags?|backpacks?|purses?|satchels?|totes?)\b/i', $searchable)) {
-        return $assetPrefix . 'assets/carousel-bag.jpg';
+    if (preg_match('/\b(backpacks?|rucksacks?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-backpack.jpg';
+    }
+
+    if (preg_match('/\b(tote bags?|totes?|shopping bags?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-tote-bag.jpg';
+    }
+
+    if (preg_match('/\b(duffel|duffle|gym|travel|weekender) bags?\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-duffel-bag.jpg';
+    }
+
+    if (preg_match('/\b(white|cream|ivory)\b/i', $searchable) && preg_match('/\b(bags?|handbags?|purses?|satchels?|clutches?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-white-handbag.jpg';
+    }
+
+    if (preg_match('/\b(bags?|handbags?|purses?|satchels?|shoulder bags?|crossbody bags?|clutches?)\b/i', $searchable)) {
+        return $assetPrefix . 'assets/product-leather-handbag.jpg';
     }
 
     $image = trim((string) ($product['image'] ?? ''));
