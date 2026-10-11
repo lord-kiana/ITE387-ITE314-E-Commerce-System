@@ -27,12 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_role'] = $user['role'];
 
-        $stmt = $pdo->prepare(
-            'INSERT INTO public.carts (user_id)
-             VALUES (:uid)
-             ON CONFLICT (user_id) DO NOTHING'
-        );
-        $stmt->execute([':uid' => $user['id']]);
+        if ($user['role'] !== 'admin') {
+            $stmt = $pdo->prepare(
+                'INSERT INTO public.carts (user_id)
+                 VALUES (:uid)
+                 ON CONFLICT (user_id) DO NOTHING'
+            );
+            $stmt->execute([':uid' => $user['id']]);
+        }
 
         header('Location: ../index.php');
         exit;

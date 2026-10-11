@@ -21,6 +21,16 @@ function require_login(): void
     }
 }
 
+function require_customer(): void
+{
+    require_login();
+
+    if (($_SESSION['user_role'] ?? 'customer') === 'admin') {
+        header('Location: /admin/products.php');
+        exit;
+    }
+}
+
 function require_admin(): void
 {
     require_login();

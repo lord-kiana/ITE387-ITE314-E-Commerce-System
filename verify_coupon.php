@@ -14,6 +14,15 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
+if (($_SESSION['user_role'] ?? '') === 'admin') {
+    http_response_code(403);
+    echo json_encode([
+        'valid' => false,
+        'message' => 'Coupons are available to customer accounts only.'
+    ]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([

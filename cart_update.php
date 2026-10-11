@@ -3,7 +3,7 @@
 require_once __DIR__ . '/db/database.php';
 require_once __DIR__ . '/includes/auth.php';
 
-require_login();
+require_customer();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

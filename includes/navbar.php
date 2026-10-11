@@ -3,7 +3,7 @@ $navLoggedIn = !empty($_SESSION['user_id']);
 $navIsAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
 $navCartCount = 0;
 
-if ($navLoggedIn && isset($pdo)) {
+if ($navLoggedIn && !$navIsAdmin && isset($pdo)) {
     try {
         $navCartStmt = $pdo->prepare(
             'SELECT COALESCE(SUM(ci.quantity), 0)
@@ -30,11 +30,11 @@ $navPage = basename($_SERVER['SCRIPT_NAME'] ?? '');
         <div class="collapse navbar-collapse" id="shopNavbar">
             <div class="navbar-nav me-auto ms-lg-4">
                 <a class="nav-link <?= $navPage === 'index.php' ? 'active' : '' ?>" href="/index.php">Shop</a>
-                <?php if ($navLoggedIn): ?>
+                <?php if ($navLoggedIn && !$navIsAdmin): ?>
                     <a class="nav-link <?= $navPage === 'orders.php' ? 'active' : '' ?>" href="/orders.php">My orders</a>
-                    <?php if ($navIsAdmin): ?>
-                        <a class="nav-link <?= $navPage === 'products.php' ? 'active' : '' ?>" href="/admin/products.php">Manage products</a>
-                    <?php endif; ?>
+                <?php endif; ?>
+                <?php if ($navLoggedIn && $navIsAdmin): ?>
+                    <a class="nav-link <?= $navPage === 'products.php' ? 'active' : '' ?>" href="/admin/products.php">Manage products</a>
                 <?php endif; ?>
             </div>
             <form class="navbar-search" action="/index.php" method="get" role="search">
@@ -44,9 +44,11 @@ $navPage = basename($_SERVER['SCRIPT_NAME'] ?? '');
             </form>
             <div class="navbar-actions">
                 <?php if ($navLoggedIn): ?>
-                    <a class="nav-cart" href="/cart.php" aria-label="Cart, <?= $navCartCount ?> items">
-                        <span>Cart</span><span class="cart-count"><?= $navCartCount ?></span>
-                    </a>
+                    <?php if (!$navIsAdmin): ?>
+                        <a class="nav-cart" href="/cart.php" aria-label="Cart, <?= $navCartCount ?> items">
+                            <span>Cart</span><span class="cart-count"><?= $navCartCount ?></span>
+                        </a>
+                    <?php endif; ?>
                     <span class="nav-greeting">Hi, <?= h($_SESSION['user_name'] ?? 'there') ?></span>
                     <form action="/auth/logout.php" method="post">
                         <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">

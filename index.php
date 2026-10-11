@@ -25,7 +25,8 @@ function e($value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-$isLoggedIn = !empty($_SESSION['user_id']);
+$isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
+$isLoggedIn = !empty($_SESSION['user_id']) && !$isAdmin;
 $cartMessage = $_SESSION['cart_error'] ?? '';
 unset($_SESSION['cart_error']);
 ?>
@@ -246,6 +247,8 @@ unset($_SESSION['cart_error']);
                                             Add to Cart
                                         </button>
                                     </form>
+                                <?php elseif ($isAdmin): ?>
+                                    <a href="admin/products.php" class="btn btn-outline-primary w-100">Manage Products</a>
                                 <?php else: ?>
                                     <a href="auth/login.php?buy=<?= $productId ?>"
                                        class="btn btn-primary w-100">
