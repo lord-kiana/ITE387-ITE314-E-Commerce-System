@@ -5,26 +5,11 @@ require_once __DIR__ . '/includes/auth.php';
 $searchQuery = trim((string) ($_GET['q'] ?? ''));
 
 try {
-    if ($searchQuery !== '') {
-        $stmt = $pdo->prepare(
-            "SELECT id, name, description, price, image, stock
-             FROM public.products
-             WHERE name ILIKE :name_query
-                OR COALESCE(description, '') ILIKE :description_query
-             ORDER BY created_at DESC"
-        );
-        $searchTerm = '%' . $searchQuery . '%';
-        $stmt->execute([
-            ':name_query' => $searchTerm,
-            ':description_query' => $searchTerm,
-        ]);
-    } else {
-        $stmt = $pdo->query(
-            "SELECT id, name, description, price, image, stock
-             FROM public.products
-             ORDER BY created_at DESC"
-        );
-    }
+    $stmt = $pdo->query(
+        "SELECT id, name, description, price, image, stock
+         FROM public.products
+         ORDER BY created_at DESC"
+    );
 
     $products = $stmt->fetchAll();
 
@@ -122,14 +107,15 @@ unset($_SESSION['cart_error']);
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1"><?= $searchQuery !== '' ? 'Search results' : 'Our Products' ?></h2>
-            <p class="text-secondary mb-0">
-                <?= $searchQuery !== '' ? 'Showing matches for “' . e($searchQuery) . '”.' : 'Explore our latest collection.' ?>
+            <h2 class="fw-bold mb-1" id="product-heading"><?= $searchQuery !== '' ? 'Search results' : 'Our Products' ?></h2>
+            <p class="text-secondary mb-0" id="product-subtitle">
+                <?= $searchQuery !== '' ? 'Showing matches for &quot;' . e($searchQuery) . '&quot;.' : 'Explore our latest collection.' ?>
             </p>
         </div>
 
         <span class="badge bg-primary rounded-pill">
-            <?= count($products) ?> <?= count($products) === 1 ? 'Product' : 'Products' ?>
+            <span id="product-count"><?= count($products) ?></span>
+            <span id="product-count-label"><?= count($products) === 1 ? 'Product' : 'Products' ?></span>
         </span>
     </div>
 
@@ -150,7 +136,8 @@ unset($_SESSION['cart_error']);
                 $stock = (int) $product['stock'];
             ?>
 
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 product-result"
+                 data-product-search="<?= e($product['name'] . ' ' . ($product['description'] ?? '')) ?>">
                 <div class="card product-card h-100">
 
                     <?php if (!empty($product['image'])): ?>
@@ -234,6 +221,10 @@ unset($_SESSION['cart_error']);
             </div>
         <?php endforeach; ?>
 
+        <div class="col-12" id="live-search-empty" hidden>
+            <div class="alert alert-info mb-0">No products matched your search. Try another name or keyword.</div>
+        </div>
+
     </div>
 </main>
 
@@ -247,6 +238,7 @@ unset($_SESSION['cart_error']);
 </footer>
 
 <script type="module" src="assets/firebase-inventory.js"></script>
+<script src="JS/product-search.js"></script>
 
 </body>
 </html>
