@@ -57,6 +57,15 @@
         });
     });
 
+    document.querySelectorAll('[data-footer-category]').forEach((link) => {
+        link.addEventListener('click', () => {
+            const categoryButton = categoryButtons.find(
+                (button) => button.dataset.categoryFilter === link.dataset.footerCategory
+            );
+            categoryButton?.click();
+        });
+    });
+
     input.addEventListener('input', () => filterProducts(input.value));
     form.addEventListener('submit', (event) => {
         event.preventDefault();

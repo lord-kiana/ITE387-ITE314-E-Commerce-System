@@ -276,12 +276,50 @@ unset($_SESSION['cart_error']);
     </div>
 </main>
 
-<footer class="bg-dark text-white text-center py-4">
+<footer class="site-footer">
     <div class="container">
-        <p class="mb-1 fw-bold">ShopFlow</p>
-        <p class="mb-0 small text-white-50">
-            Your simple and convenient online shopping experience.
-        </p>
+        <div class="row g-4 align-items-start footer-main">
+            <div class="col-lg-4 footer-brand-column">
+                <a class="footer-brand" href="index.php" aria-label="ShopFlow home"><span>S</span>ShopFlow</a>
+                <p>Find useful everyday favorites, all in one place.</p>
+                <span class="footer-currency">All prices shown in Philippine pesos (&#8369;).</span>
+            </div>
+
+            <div class="col-lg-5">
+                <h2 class="footer-heading">Explore categories</h2>
+                <div class="footer-category-grid">
+                    <a class="footer-category-tile" href="#products" data-footer-category="shoes">
+                        <img src="assets/product-running-shoes.jpg" alt="Running shoes" loading="lazy">
+                        <span>Shoes <span aria-hidden="true">&rarr;</span></span>
+                    </a>
+                    <a class="footer-category-tile" href="#products" data-footer-category="bags">
+                        <img src="assets/product-leather-handbag.jpg" alt="Leather handbag" loading="lazy">
+                        <span>Bags <span aria-hidden="true">&rarr;</span></span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <h2 class="footer-heading">Quick links</h2>
+                <nav class="footer-links" aria-label="Footer links">
+                    <a href="#products" data-footer-category="all">Shop all products</a>
+                    <?php if ($isAdmin): ?>
+                        <a href="admin/products.php">Manage products</a>
+                    <?php elseif ($isLoggedIn): ?>
+                        <a href="cart.php">Your cart</a>
+                        <a href="orders.php">My orders</a>
+                    <?php else: ?>
+                        <a href="auth/login.php">Log in</a>
+                        <a href="auth/register.php">Create an account</a>
+                    <?php endif; ?>
+                </nav>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>&copy; <?= date('Y') ?> ShopFlow</span>
+            <span>Thoughtful finds for everyday life.</span>
+        </div>
     </div>
 </footer>
 
