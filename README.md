@@ -1,70 +1,62 @@
 # ShopFlow E-commerce
 
-ShopFlow is a PHP storefront backed by Supabase PostgreSQL. Customers can register, browse and search products, manage a cart, apply coupons, place demo checkouts, and review order history. Admins manage the product catalog and stock.
+ShopFlow is a server-rendered PHP storefront. PHP handles requests and sessions, Supabase PostgreSQL stores business data, and Firebase Realtime Database broadcasts stock changes to shoppers with the catalog open.
 
-## Features
+## A Request Through the App
 
-- Session-based customer and admin accounts; passwords use PHP password hashing and state-changing forms use CSRF tokens.
-- Product search, derived Shoes/Bags/Other categories, and catalog image selection.
-- Persistent carts with stock validation when items are added or quantities change.
-- Coupon validation for active dates, minimum order amount, maximum discount, total usage limit, and per-customer usage limit.
-- Transactional checkout creates an order and order items, deducts stock, records coupon redemption, and clears the cart.
-- Admin product create, edit, and delete operations.
-- Firebase Realtime Database listener updates product stock and out-of-stock states in open storefronts.
-- Checkout payment selection is a demo only; no payment is collected or card data stored.
+When a shopper opens `index.php`, PHP reads products from PostgreSQL and renders the initial page. The browser can then filter the rendered catalog by product name and description. Category labels such as Shoes and Bags are inferred from those same text fields in PHP; there is no category table.
 
-## Data Stores
+Registration stores a password hash in `users`. Login verifies that hash and places the user ID and role in a PHP session. Shared helpers in `includes/auth.php` check those roles, escape HTML, and validate CSRF tokens on state-changing forms. Admin pages require the `admin` role; customer actions require a signed-in non-admin account.
 
-### Supabase PostgreSQL
+## Cart and Checkout Flow
 
-PostgreSQL is the source of truth for accounts, products, carts, orders, coupons, and inventory. The application uses PDO with `pdo_pgsql` and SSL. Its queries expect these tables:
+Each customer has a persistent cart in PostgreSQL. Adding an item checks current stock and updates `cart_items`; changing or removing a quantity changes the cart, but does not reserve or deduct inventory. This keeps the product stock value available as the shared source of truth rather than treating each cart as a reservation.
 
-| Table | Purpose |
+Coupon codes are checked against their active dates, order minimum, overall usage limit, and per-customer redemption history. The browser can request an early check through `verify_coupon.php`, but checkout validates the coupon again because cart contents and coupon usage can change before the order is submitted.
+
+Checkout is the point where an order becomes authoritative. `checkout.php` starts a PostgreSQL transaction, locks the customer's cart and product rows, validates quantities and stock, calculates the final total, and creates the order. For every item it calls `public.deduct_inventory(BIGINT, INTEGER)`, saves an order-item snapshot, updates coupon usage if needed, and clears the cart. A failed PostgreSQL step rolls back the transaction. After a successful commit, PHP attempts the Firebase inventory sync; a Firebase error is logged but cannot undo the committed order. Card and cash-on-delivery choices are demonstrations only: no payment is collected and no card details are stored.
+
+## How the Data Fits Together
+
+PostgreSQL is the source of truth for accounts, carts, orders, coupons, and inventory. The code expects these tables:
+
+| Tables | Stored information |
 | --- | --- |
-| `users` | Customer and admin accounts, including password hashes and roles |
-| `products` | Product details, price, image, and available stock |
-| `carts`, `cart_items` | Per-customer carts and product quantities |
-| `orders`, `order_items` | Order totals and purchase-time product, price, and quantity snapshots |
-| `coupons`, `coupon_redemptions` | Coupon rules, usage counts, and customer redemptions |
+| `users` | Names, email addresses, password hashes, and account roles |
+| `products` | Catalog descriptions, prices, image references, and stock counts |
+| `carts`, `cart_items` | A customer's active cart and its product quantities |
+| `orders`, `order_items` | Order totals and purchase-time product, price, and quantity details |
+| `coupons`, `coupon_redemptions` | Discount rules, usage counts, and which customers redeemed them |
 
-Checkout runs in a PostgreSQL transaction, locks the cart and product rows, validates current stock, and calls `public.deduct_inventory(BIGINT, INTEGER)` for conditional stock deductions. The database schema and SQL definition for this function are not included in this repository; they must already exist in Supabase. No trigger definitions or schema migrations are included here. Product categories are derived from product names and descriptions in PHP, not stored in a category table.
+Conceptually, a user owns a cart and orders; cart items and order items connect those records to products. A coupon can be associated with orders and redemptions. Product category is calculated from product text rather than represented by a database relationship.
 
-### Firebase Realtime Database
+The database schema itself is hosted in Supabase and is not defined in this repository. The application also depends on the PostgreSQL function `public.deduct_inventory`, whose SQL definition is external. This repository contains no schema migrations or trigger definitions, so it does not show how tables, constraints, triggers, or that function were originally created.
 
-Firebase mirrors inventory for live storefront updates; it does not authorize purchases or replace PostgreSQL's stock checks. Inventory is stored at `inventory/products/{productId}` with `id`, `name`, `stock`, and `updatedAt` fields.
+## Why Inventory Uses Two Databases
 
-The PHP Admin SDK seeds this path from PostgreSQL when it is empty, then synchronizes product additions, edits, deletions, and stock deductions after successful checkout commits. The browser subscribes to `inventory/products`. `firebase-database.rules.json` permits public reads of inventory and denies client writes; server writes use a Firebase service account.
+PostgreSQL controls whether a purchase can happen. Its row locks and `deduct_inventory` function prevent checkout from selling more units than are available. Firebase is a read-optimized mirror used to make other open storefronts react immediately; it never approves a checkout.
 
-## Application Map
+Inventory records live at `inventory/products/{productId}` in Firebase and contain the product ID, name, stock count, and update timestamp. On a storefront request, the PHP Admin SDK seeds that path from PostgreSQL if it is empty. When an admin adds, edits, or deletes a product, or checkout commits a stock deduction, PHP synchronizes the affected Firebase records. `JS/firebase-inventory.js` subscribes to `inventory/products` and updates the visible stock count, quantity limit, and in-stock/out-of-stock state in the browser.
 
-| Path | Responsibility |
+The Firebase rules in `firebase-database.rules.json` allow shoppers to read inventory but deny browser writes. The PHP server writes through the Admin SDK using a service account held in Render environment settings. This is why the Firebase private key must never be placed in browser JavaScript or committed to the repository.
+
+## Code Map
+
+| File or directory | Role in the request flow |
 | --- | --- |
-| `index.php` | Product catalog, search, and Firebase stock listener configuration |
-| `auth/` | Registration, login, and logout |
-| `cart.php`, `cart_add.php`, `cart_update.php` | Customer cart display and updates |
-| `checkout.php`, `verify_coupon.php`, `orders.php` | Coupon verification, checkout, and order history |
-| `admin/products.php` | Admin product and stock management |
-| `DB/database.php` | PostgreSQL connection and initial product query |
-| `includes/auth.php` | Session roles, access checks, escaping, and CSRF helpers |
-| `includes/firebase-inventory.php` | Firebase initialization, initial inventory seed, and server-side sync |
-| `JS/firebase-inventory.js` | Realtime inventory subscription and storefront updates |
-| `includes/product-image.php` | Product category and image selection helpers |
+| `index.php` | Loads the catalog, renders stock states, and supplies the public Firebase database URL to the browser |
+| `auth/` | Creates accounts, verifies logins, and ends sessions |
+| `cart.php`, `cart_add.php`, `cart_update.php` | Reads and changes persistent customer carts |
+| `verify_coupon.php`, `checkout.php`, `orders.php` | Checks discounts, places orders, and displays purchase history |
+| `admin/products.php` | Creates, edits, and deletes catalog products |
+| `DB/database.php` | Opens the PDO PostgreSQL connection using environment settings |
+| `includes/auth.php` | Provides session, role, escaping, and CSRF helpers |
+| `includes/firebase-inventory.php` | Initializes the Admin SDK, seeds inventory, and syncs server-side changes |
+| `JS/firebase-inventory.js` | Listens for live Firebase inventory changes and updates the catalog DOM |
+| `includes/product-image.php` | Chooses image assets and derives display categories from product text |
 
-## Configuration and Deployment
+## Runtime Configuration
 
-The Docker image uses PHP 8.3 Apache, Composer, PDO PostgreSQL, and the extensions required by the Firebase Admin SDK. Render configuration is in `render.yaml`.
+The Docker image runs Apache with PHP 8.3. Composer installs the Firebase Admin SDK; the image enables PDO PostgreSQL and the PHP extensions required by the SDK. Render's web-service definition is in `render.yaml`.
 
-Set these environment variables in Render:
-
-| Variable | Value |
-| --- | --- |
-| `DB_HOST` | Supabase database hostname only |
-| `DB_PORT` | PostgreSQL port, usually `5432` |
-| `DB_NAME` | Database name, usually `postgres` |
-| `DB_USER` | Supabase database username |
-| `DB_PASSWORD` | Supabase database password |
-| `DB_SSLMODE` | `require` |
-| `FIREBASE_DATABASE_URL` | Realtime Database URL |
-| `FIREBASE_SERVICE_ACCOUNT_JSON` | Complete Firebase Admin service-account JSON |
-
-Publish the rules from `firebase-database.rules.json` in Firebase Console. Keep the service-account key out of source control; `.gitignore` excludes local `.env` files and `vendor/`.
+The database connection reads `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and `DB_SSLMODE`. Firebase uses `FIREBASE_DATABASE_URL` and `FIREBASE_SERVICE_ACCOUNT_JSON`. These values are supplied to the app at runtime, not hard-coded into PHP. Local placeholders are listed in `.env.example`; `.gitignore` excludes local `.env` files and Composer's `vendor/` directory.
