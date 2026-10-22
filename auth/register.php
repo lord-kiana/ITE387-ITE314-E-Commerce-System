@@ -1,6 +1,6 @@
 
 <?php
-require_once __DIR__ . '/../db/database.php';
+require_once __DIR__ . '/../DB/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 
 $error = '';

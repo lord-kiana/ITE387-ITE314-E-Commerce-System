@@ -5,15 +5,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$host = 'aws-0-ap-northeast-1.pooler.supabase.com';
-$port = '5432';
-$dbname = 'postgres';
-$username = 'postgres.dbltkvzepknrbaqdjhgq';
-$password = 'HVrhNfzDmML95aLJ';
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT') ?: '5432';
+$dbname = getenv('DB_NAME') ?: 'postgres';
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
+$sslmode = getenv('DB_SSLMODE') ?: 'require';
 
 try {
     $pdo = new PDO(
-        "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require",
+        "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=$sslmode",
         $username,
         $password,
         [
