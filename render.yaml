@@ -17,3 +17,7 @@ services:
         sync: false
       - key: DB_SSLMODE
         value: require
+      - key: FIREBASE_DATABASE_URL
+        value: https://shopflow-4c4e9-default-rtdb.asia-southeast1.firebasedatabase.app
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false

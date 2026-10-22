@@ -2,6 +2,7 @@
 require_once __DIR__ . '/DB/database.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/product-image.php';
+require_once __DIR__ . '/includes/firebase-inventory.php';
 
 $searchQuery = trim((string) ($_GET['q'] ?? ''));
 
@@ -19,6 +20,8 @@ try {
     $products = [];
     $productError = true;
 }
+
+firebase_seed_inventory_if_empty($pdo, $products);
 
 function e($value): string
 {
@@ -182,7 +185,8 @@ unset($_SESSION['cart_error']);
                 $productImage = product_image_url($product);
             ?>
 
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 product-result"
+              <div class="col-12 col-sm-6 col-lg-4 col-xl-3 product-result"
+                  data-product-id="<?= $productId ?>"
                  data-product-search="<?= e($product['name'] . ' ' . ($product['description'] ?? '')) ?>"
                  data-product-category="<?= e(strtolower(product_category($product))) ?>">
                 <div class="card product-card h-100">
@@ -211,7 +215,7 @@ unset($_SESSION['cart_error']);
                                 &#8369;<?= number_format((float) $product['price'], 2) ?>
                             </h4>
 
-                            <?php if ($stock > 0): ?>
+                            <div data-stock-state="available" <?= $stock > 0 ? '' : 'hidden' ?>>
                                 <p class="small text-success">
                                     In stock:
                                     <span data-product-stock="<?= $productId ?>">
@@ -239,7 +243,7 @@ unset($_SESSION['cart_error']);
                                             name="quantity"
                                             value="1"
                                             min="1"
-                                            max="<?= min(99, $stock) ?>"
+                                            max="<?= max(1, min(99, $stock)) ?>"
                                             required>
 
                                         <button type="submit"
@@ -256,13 +260,15 @@ unset($_SESSION['cart_error']);
                                     </a>
                                 <?php endif; ?>
 
-                            <?php else: ?>
+                            </div>
+
+                            <div data-stock-state="empty" <?= $stock > 0 ? 'hidden' : '' ?>>
                                 <p class="small text-danger">Out of stock</p>
 
                                 <button class="btn btn-secondary w-100" disabled>
                                     Out of Stock
                                 </button>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -323,7 +329,13 @@ unset($_SESSION['cart_error']);
     </div>
 </footer>
 
-<script type="module" src="assets/firebase-inventory.js"></script>
+<script>
+    window.shopFlowFirebaseConfig = <?= json_encode(
+        ['databaseURL' => getenv('FIREBASE_DATABASE_URL') ?: ''],
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    ) ?>;
+</script>
+<script type="module" src="JS/firebase-inventory.js"></script>
 <script src="JS/product-search.js"></script>
 
 </body>

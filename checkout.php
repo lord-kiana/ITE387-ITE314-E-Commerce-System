@@ -3,6 +3,7 @@
 require_once __DIR__ . '/DB/database.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/product-image.php';
+require_once __DIR__ . '/includes/firebase-inventory.php';
 
 require_customer();
 
@@ -290,6 +291,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([':cart' => $cartId]);
 
         $pdo->commit();
+        firebase_sync_inventory(
+            $pdo,
+            array_column($items, 'product_id')
+        );
         $paymentConfirmation = $paymentMethod === 'card'
             ? 'Demo card checkout completed. No card details were stored and no payment was collected.'
             : 'Cash on delivery selected. Payment is due when your order arrives.';

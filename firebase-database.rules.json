@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "inventory": {
+      "products": {
+        ".read": true,
+        ".write": false
+      }
+    }
+  }
+}

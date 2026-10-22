@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../DB/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/product-image.php';
+require_once __DIR__ . '/../includes/firebase-inventory.php';
 
 require_admin();
 
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare('DELETE FROM public.products WHERE id = :id');
                 $stmt->execute([':id' => $id]);
+                firebase_sync_inventory($pdo, [$id]);
                 $_SESSION['admin_notice'] = $stmt->rowCount()
                     ? 'Product removed.'
                     : 'That product could not be found.';
@@ -72,11 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':stock' => (int) $stockInput,
                         ':id' => $id,
                     ]);
+                    $savedProductId = $id;
                     $_SESSION['admin_notice'] = 'Product changes saved.';
                 } else {
                     $stmt = $pdo->prepare(
                         'INSERT INTO public.products (name, description, price, image, stock)
-                         VALUES (:name, :description, :price, :image, :stock)'
+                         VALUES (:name, :description, :price, :image, :stock)
+                         RETURNING id'
                     );
                     $stmt->execute([
                         ':name' => $name,
@@ -85,8 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':image' => $image !== '' ? $image : null,
                         ':stock' => (int) $stockInput,
                     ]);
+                    $savedProductId = (int) $stmt->fetchColumn();
                     $_SESSION['admin_notice'] = 'Product added to the catalog.';
                 }
+                firebase_sync_inventory($pdo, [$savedProductId]);
                 header('Location: products.php');
                 exit;
             } catch (PDOException $e) {
