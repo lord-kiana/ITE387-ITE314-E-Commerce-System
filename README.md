@@ -6,6 +6,32 @@ ShopFlow is a server-rendered PHP storefront. PHP handles requests and sessions,
 
 When a shopper opens `index.php`, PHP reads products from PostgreSQL and renders the initial page. The browser can then filter the rendered catalog by product name and description. Category labels such as Shoes and Bags are inferred from those same text fields in PHP; there is no category table.
 
+The main request and inventory flow is:
+
+```mermaid
+sequenceDiagram
+	actor Shopper
+	participant Browser
+	participant PHP as PHP / Apache
+	participant PG as Supabase PostgreSQL
+	participant RTDB as Firebase Realtime Database
+
+	Shopper->>Browser: Open catalog
+	Browser->>PHP: GET index.php
+	PHP->>PG: Read products and stock
+	PG-->>PHP: Product rows
+	PHP-->>Browser: Render product page
+	Browser->>RTDB: Subscribe to inventory/products
+	RTDB-->>Browser: Current and future stock values
+
+	Shopper->>Browser: Add items and submit checkout
+	Browser->>PHP: POST cart / checkout actions
+	PHP->>PG: Validate, lock rows, write order, deduct stock
+	PG-->>PHP: Commit or rollback transaction
+	PHP->>RTDB: Sync stock after successful commit
+	RTDB-->>Browser: Notify open storefronts of stock changes
+```
+
 Registration stores a password hash in `users`. Login verifies that hash and places the user ID and role in a PHP session. Shared helpers in `includes/auth.php` check those roles, escape HTML, and validate CSRF tokens on state-changing forms. Admin pages require the `admin` role; customer actions require a signed-in non-admin account.
 
 ## Cart and Checkout Flow
@@ -31,6 +57,21 @@ PostgreSQL is the source of truth for accounts, carts, orders, coupons, and inve
 Conceptually, a user owns a cart and orders; cart items and order items connect those records to products. A coupon can be associated with orders and redemptions. Product category is calculated from product text rather than represented by a database relationship.
 
 The database schema itself is hosted in Supabase and is not defined in this repository. The application also depends on the PostgreSQL function `public.deduct_inventory`, whose SQL definition is external. This repository contains no schema migrations or trigger definitions, so it does not show how tables, constraints, triggers, or that function were originally created.
+
+## Project Requirement Coverage
+
+| Requirement | How the project addresses it | Coverage in this repository |
+| --- | --- | --- |
+| Registration and login | PHP registration/login pages hash passwords and create role-based sessions. | Implemented |
+| Browse, cart, and checkout | The catalog reads PostgreSQL products; cart pages persist quantities; checkout creates orders and deducts stock. | Implemented |
+| PHP backend for authentication and transactions | PHP page handlers use PDO for database access; coupon verification also returns JSON. | Implemented |
+| Firebase real-time inventory | The browser subscribes to Realtime Database; PHP seeds and synchronizes stock from PostgreSQL. | Implemented; requires Firebase rules and Render credentials |
+| Order history | `orders.php` reads a customer's orders and item snapshots. | Implemented |
+| Dynamic coupon verification | Coupons are checked against dates, limits, customer redemptions, and cart totals, then rechecked during checkout. | Implemented |
+| Relational database design | Queries use users, products, carts, cart items, orders, order items, coupons, and redemptions. | Used by the app; schema DDL is external |
+| Categories entity | Shoes/Bags/Other labels are derived from product names and descriptions. | Partial: no `categories` table is used by this code |
+| ACID checkout and inventory locking | Checkout uses a PostgreSQL transaction and row locks, then calls `public.deduct_inventory`. | Implemented by the PHP flow; stored-function definition is external |
+| Database triggers or stored procedures | The checkout calls the `deduct_inventory` database function. | Not verifiable here: function SQL and trigger definitions are not included |
 
 ## Why Inventory Uses Two Databases
 
